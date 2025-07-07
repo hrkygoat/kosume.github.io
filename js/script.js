@@ -333,53 +333,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ★追加: 商品詳細ページ専用: 商品画像スライドショー
-    let productSlideIndex = 0;
-    let productSlideshowTimer; // タイマーを保持する変数
+  // ★修正・再構築: 商品詳細ページ専用: 商品画像スライドショー
+  function startProductDetailSlideshow() {
+    const productSlides = document.querySelectorAll('.product-slideshow-container .product-slide');
+    const thumbnails = document.querySelectorAll('.thumbnail-images .thumbnail');
 
-    function startProductDetailSlideshow() {
-        const productSlides = document.querySelectorAll('.product-slideshow-container .product-slide');
-        const thumbnails = document.querySelectorAll('.thumbnail-images .thumbnail');
-
-        if (productSlides.length === 0) return; // スライドがない場合は処理しない
-
-        // スライドを表示する関数
-        function showProductSlides(n) {
-            productSlides.forEach(slide => slide.classList.remove('active'));
-            thumbnails.forEach(thumb => thumb.classList.remove('active'));
-
-            if (n >= productSlides.length) {
-                productSlideIndex = 0;
-            } else if (n < 0) {
-                productSlideIndex = productSlides.length - 1;
-            } else {
-                productSlideIndex = n;
-            }
-
-            productSlides[productSlideIndex].classList.add('active');
-            thumbnails[productSlideIndex].classList.add('active');
-        }
-
-        // 自動切り替えを開始する関数
-        function autoAdvanceSlides() {
-            productSlideshowTimer = setTimeout(() => {
-                showProductSlides(productSlideIndex + 1);
-                autoAdvanceSlides(); // 次の自動切り替えを予約
-            }, 5000); // 5秒ごとに切り替え
-        }
-
-        // サムネイルクリックイベント
-        thumbnails.forEach(thumbnail => {
-            thumbnail.addEventListener('click', () => {
-                const index = parseInt(thumbnail.getAttribute('data-index'));
-                clearTimeout(productSlideshowTimer); // 自動切り替えを一時停止
-                showProductSlides(index);
-                autoAdvanceSlides(); // 新しい位置から自動切り替えを再開
-            });
-        });
-
-        // 初期表示と自動切り替えの開始
-        showProductSlides(0); // 最初のスライドを表示
-        autoAdvanceSlides(); // 自動切り替えを開始
+    if (productSlides.length === 0 || thumbnails.length === 0) {
+        console.warn('商品詳細スライドショーの要素が見つかりません。');
+        return;
     }
+
+    let currentProductSlideIndex = 0;
+    let productSlideshowInterval; // setIntervalのIDを保持
+
+    // 特定のスライドを表示する関数
+    function displaySlide(index) {
+        // 全てのスライドとサムネイルのactiveクラスを削除
+        productSlides.forEach(slide => slide.classList.remove('active'));
+        thumbnails.forEach(thumb => thumb.classList.remove('active'));
+
+        // 指定されたインデックスのスライドとサムネイルにactiveクラスを追加
+        if (productSlides[index]) {
+            productSlides[index].classList.add('active');
+        }
+        if (thumbnails[index]) {
+            thumbnails[index].classList.add('active');
+        }
+        currentProductSlideIndex = index; // 現在のインデックスを更新
+    }
+
+    // 次のスライドに切り替える関数（自動再生用）
+    function nextSlide() {
+        const nextIndex = (currentProductSlideIndex + 1) % productSlides.length;
+        displaySlide(nextIndex);
+    }
+
+    // 自動再生を開始する関数
+    function startAutoPlay() {
+        // 既存のタイマーがあればクリア
+        clearInterval(productSlideshowInterval);
+        // 新しいタイマーを設定
+        productSlideshowInterval = setInterval(nextSlide, 5000); // 5秒ごとに切り替え
+    }
+
+    // サムネイルクリック時のイベントリスナーを設定
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', () => {
+            const index = parseInt(thumbnail.getAttribute('data-index'));
+            if (!isNaN(index)) { // indexが有効な数値であることを確認
+                displaySlide(index); // クリックされたスライドを表示
+                startAutoPlay(); // その後、自動再生を再開
+            }
+        });
+    });
+
+    // 初回表示と自動再生の開始
+    displaySlide(0); // 最初のスライドを表示
+    startAutoPlay(); // 自動再生を開始
+}
 });

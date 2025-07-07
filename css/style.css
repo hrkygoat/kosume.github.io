@@ -182,11 +182,14 @@ header .container {
 
 /* ヒーローセクション（スライドショー） */
 .hero-section {
-    position: relative;
+    position: relative; /* スライドテキストのabsolute配置の基準 */
     width: 100%;
-    height: 100vh; /* ビューポートの高さに合わせる */
+    height: 100vh; /* 画面の高さに合わせる */
     overflow: hidden;
-    margin-top: 0; /* ヘッダーの高さ分を考慮しない */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light-background-color);
 }
 
 .slideshow-container {
@@ -223,16 +226,29 @@ header .container {
 }
 
 .slide-text {
-    position: absolute;
-    bottom: 20%; /* 下から20%の位置 */
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    font-size: 3em;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    z-index: 10;
-    white-space: nowrap; /* テキストの折り返しを防ぐ */
+    position: absolute; /* スライドコンテナを基準に配置 */
+    top: 15%; /* 上からの位置を調整（商品と被りにくいように） */
+    bottom: 15%; /* 下からの位置も調整し、縦方向のセンタリングを補助 */
+    right: 8%; /* 右からの余白を調整 */
+    
+    /* 縦書き設定 */
+    writing-mode: vertical-rl; /* 右から左へ、縦書き */
+    -webkit-writing-mode: vertical-rl; /* Webkitブラウザ対応 */
+    text-orientation: upright; /* 文字の向きを縦にする (漢字・かな向け) */
+    
+    font-family: 'Noto Serif JP', serif; /* ★変更: 細い明朝体 */
+    font-weight: 300; /* 細いウェイト */
+    font-size: 2.8em; /* フォントサイズを調整 */
+    color: rgba(81, 73, 73, 0.935); /* デフォルトのテキストカラーを使用 */
+    /* background-color: rgba(255, 255, 255, 0.75); 背景を少し濃くして視認性向上 */
+    padding: 30px 20px; /* パディングを調整 */
+    border-radius: 12px; /* 角を丸める */
+    text-shadow: 2px 2px 3px rgba(242, 231, 231, 0.852); /* 影を少し強めて強調 */
+    white-space: nowrap; /* テキストが途中で改行されないようにする */
+    display: flex; /* 縦書きの配置を中央に寄せるためにflexboxを使用 */
+    align-items: center; /* 縦方向の中央揃え */
+    justify-content: center; /* 横方向の中央揃え */
+    z-index: 10; /* 他の要素より手前に表示 */
 }
 
 
@@ -511,35 +527,34 @@ footer {
     text-align: center;
 }
 
-/* ★追加: 商品詳細スライドショーのコンテナ */
+/* ★修正点: 商品詳細スライドショーのコンテナ */
 .product-slideshow-container {
-    position: relative;
+    position: relative; /* 子要素のabsolute基準 */
     width: 100%;
-    /* 1:1のアスペクト比を維持 */
-    padding-top: 100%; /* 高さ = 幅 になるように設定 */
+    padding-top: 100%; /* 1:1のアスペクト比を維持 (正方形) */
     overflow: hidden;
     margin-bottom: 15px;
     border: 1px solid #eee;
     border-radius: 8px;
+    background-color: #f8f8f8; /* 画像がない場合の背景色 */
 }
 
-/* ★追加: 各商品スライドのスタイル */
+/* ★修正点: 各商品スライドのスタイル */
 .product-slide {
-    position: absolute;
+    position: absolute; /* 親要素 .product-slideshow-container を基準に配置 */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out; /* フェードアニメーション */
+    opacity: 0; /* 非アクティブ時は非表示 */
+    transition: opacity 1.0s ease-in-out; /* 1.0秒でフェードイン/アウト */
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f8f8; /* 背景色 */
 }
 
 .product-slide.active {
-    opacity: 1;
+    opacity: 1; /* アクティブ時は表示 */
 }
 
 .product-slide img {
@@ -715,10 +730,6 @@ footer {
     .product-images {
         margin-bottom: 30px;
     }
-
-    /* .product-images .main-image img { ← これを削除またはコメントアウト */
-    /* max-height: 400px; */
-    /* } */
 }
 
 @media (max-width: 768px) {
