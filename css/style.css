@@ -192,77 +192,59 @@ header .container {
     transition: 0.3s;
 }
 
-/* ヒーローセクション（スライドショー） */
 .hero-section {
-    position: relative; /* スライドテキストのabsolute配置の基準 */
+    position: relative; /* テキストのabsolute配置の基準 */
     width: 100%;
     height: 100vh; /* 画面の高さに合わせる */
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-background-color);
+    display: flex; /* 画像とテキストの位置調整のためにflexboxを使用 */
+    justify-content: center; /* 横方向中央揃え */
+    align-items: center; /* 縦方向中央揃え */
+    /* background-color: var(--light-background-color); これは不要になるか、適切な代替色を指定 */
+    background-color: #f0f0f0; /* 背景色をFallbackで指定 */
 }
 
-.slideshow-container {
-    position: absolute;
+/* 新しく追加するヒーロー画像用のスタイル */
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画面全体をカバーするように画像を調整 */
+    position: absolute; /* .hero-sectionの背景として配置 */
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    z-index: 1; /* テキストより後ろに配置 */
 }
 
-.slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #ccc; /* fallback */
-}
-
-.slide.active {
-    opacity: 1;
-}
-
-.slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 画像をカバーフィット */
-    display: block;
-}
-
+/* ヒーローテキストはそのまま残す */
 .slide-text {
-    position: absolute; /* スライドコンテナを基準に配置 */
-    top: 15%; /* 上からの位置を調整（商品と被りにくいように） */
-    bottom: 15%; /* 下からの位置も調整し、縦方向のセンタリングを補助 */
-    right: 8%; /* 右からの余白を調整 */
-    
-    /* 縦書き設定 */
-    writing-mode: vertical-rl; /* 右から左へ、縦書き */
-    -webkit-writing-mode: vertical-rl; /* Webkitブラウザ対応 */
-    text-orientation: upright; /* 文字の向きを縦にする (漢字・かな向け) */
-    
-    font-family: 'Noto Serif JP', serif; /* ★変更: 細い明朝体 */
-    font-weight: 300; /* 細いウェイト */
-    font-size: 2.8em; /* フォントサイズを調整 */
-    color: rgba(81, 73, 73, 0.935); /* デフォルトのテキストカラーを使用 */
-    /* background-color: rgba(255, 255, 255, 0.75); 背景を少し濃くして視認性向上 */
-    padding: 30px 20px; /* パディングを調整 */
-    border-radius: 12px; /* 角を丸める */
-    text-shadow: 2px 2px 3px rgba(242, 231, 231, 0.852); /* 影を少し強めて強調 */
-    white-space: nowrap; /* テキストが途中で改行されないようにする */
-    display: flex; /* 縦書きの配置を中央に寄せるためにflexboxを使用 */
-    align-items: center; /* 縦方向の中央揃え */
-    justify-content: center; /* 横方向の中央揃え */
-    z-index: 10; /* 他の要素より手前に表示 */
+    position: absolute;
+    top: 15%;
+    bottom: 15%;
+    right: 8%;
+    writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    font-size: 2.8em;
+    color: rgba(81, 73, 73, 0.935);
+    padding: 30px 20px;
+    border-radius: 12px;
+    text-shadow: 2px 2px 3px rgba(242, 231, 231, 0.852);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10; /* 画像より手前に表示 */
 }
 
+/* 以前のスライドショー関連のスタイルは削除 */
+/*
+.slideshow-container { ... }
+.slide { ... }
+.slide.active { ... }
+.slide img { ... }
+*/
 
 /* 商品一覧セクション */
 .product-carousel {
@@ -508,9 +490,13 @@ footer {
         height: 70vh; /* モバイルでの高さを調整 */
     }
 
-    .slide-text {
+    .slide-text { /* これも.hero-text に名称変更しても良いかもしれません */
         font-size: 1.8em;
-        bottom: 10%; /* テキスト位置調整 */
+        bottom: 10%;
+        /* top/rightも調整が必要であれば */
+        top: 50%; /* 縦中央に近づける */
+        right: 5%; /* 右余白を調整 */
+        transform: translateY(-50%); /* 縦方向の正確な中央配置 */
     }
 
     .section-padding {
@@ -544,9 +530,10 @@ footer {
         font-size: 1.2em;
     }
 
-    .slide-text {
+    .slide-text { /* これも.hero-text に名称変更しても良いかもしれません */
         font-size: 1.4em;
-        padding: 0 10px; /* 小さい画面での調整 */
+        padding: 0 10px;
+        /* top/rightも調整が必要であれば */
     }
 
     .form-group input[type="text"],
