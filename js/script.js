@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingScreen.style.display = 'none';
                 mainContent.style.display = 'block'; // displayをblockに設定
                 mainContent.classList.add('loaded'); // opacityを1にするためのクラス
+                console.log("Loading screen finished. Initializing page features."); // 診断ログ
                 initializePageSpecificFeatures(); // ページ固有の機能を初期化
             }, 500); // フェードアウトの時間に合わせる
         }, 1500); // 1.5秒後にローディングを終了 (調整可能)
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // loadingScreenがないページ (例: shosai.html に直接アクセス)
         mainContent.style.display = 'block'; // displayをblockに設定
         mainContent.classList.add('loaded'); // opacityを1にするためのクラス
+        console.log("No loading screen. Initializing page features directly."); // 診断ログ
         initializePageSpecificFeatures(); // ページ固有の機能を初期化
     }
 
@@ -100,14 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ページ固有の機能を初期化する関数
     function initializePageSpecificFeatures() {
+        console.log("initializePageSpecificFeatures called."); // 診断ログ
         const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/'; // トップページを判断
 
         if (isIndexPage) {
+            console.log("Current page is index.html. Starting slideshow and carousel."); // 診断ログ
             startSlideshow(); // トップページのスライドショー
             setupProductCarousel(); // トップページの商品カルーセル
             // setupScrollAnimations(); // スクロールアニメーション（もし必要なら）
         } else {
             // 詳細ページ shosai.html 専用の機能
+            console.log("Current page is shosai.html. Starting product detail slideshow."); // 診断ログ
             startProductDetailSlideshow(); // 商品詳細ページの画像スライドショー
         }
     }
@@ -115,7 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // トップページ専用: スライドショー（ファーストビュー）
     function startSlideshow() {
         const slides = document.querySelectorAll('.hero-section .slide');
-        if (slides.length === 0) return;
+        console.log("startSlideshow called. Number of slides found:", slides.length); // 診断ログ
+
+        if (slides.length === 0) {
+            console.log("No slides found in .hero-section .slide. Slideshow will not start.");
+            return;
+        }
 
         let slideIndex = 0;
         let slideshowInterval;
@@ -127,9 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 slideIndex = 1;
             }
             slides[slideIndex - 1].classList.add('active');
+            console.log("Showing slide index:", slideIndex - 1); // 診断ログ
         }
 
-        slides[0].classList.add('active'); // 最初のスライドをすぐにアクティブに
+        // 最初のスライドをすぐにアクティブに
+        if (slides[0]) { // 念のためslides[0]の存在を確認
+            slides[0].classList.add('active');
+            console.log("First slide set to active immediately."); // 診断ログ
+        } else {
+            console.log("Error: slides[0] not found for initial active class."); // 診断ログ
+        }
+        
         slideshowInterval = setInterval(showSlides, 5000); // 5秒ごとにスライドを切り替え
     }
 
