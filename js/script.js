@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('header');
     const hamburgerMenu = document.querySelector('.hamburger-menu');
     const navLinks = document.querySelector('.nav-links');
-    const body = document.body; // body要素を取得
+    const body = document.body;
 
     // ローディングアニメーション
     // loadingScreenとmainContentの両方が存在する場合に適用 (通常はindex.html)
@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hamburgerMenu && navLinks) {
         hamburgerMenu.addEventListener('click', (event) => {
             navLinks.classList.toggle('active');
-            hamburgerMenu.classList.toggle('active');
-            body.classList.toggle('no-scroll');
+            hamburgerMenu.classList.toggle('active'); // 「×」マークを切り替える
+            body.classList.toggle('no-scroll'); // bodyのスクロールを禁止
             event.stopPropagation(); // ハンバーガーメニュー自身のクリックイベントがdocumentまで伝播しないように
         });
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isCurrentPageAnchor) {
                     targetId = href.substring(1);
                 } else {
-                    // index.html#about から #about の部分だけを取得
+                    // index.html#about のようなURLから #about の部分だけを取得
                     targetId = href.split('#')[1];
                 }
 
@@ -98,10 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (hamburgerMenu) {
                             hamburgerMenu.classList.remove('active');
                         }
-                        body.classList.remove('no-scroll'); // bodyのスクロール禁止を解除
+                        body.classList.remove('no-scroll');
                     }
                 } else if (isIndexPageAnchorFromOtherPage) {
-                    // shosai.htmlからindex.htmlの存在しないIDへ飛ぼうとした場合など
+                    // shosai.htmlからindex.htmlの存在しないIDへ飛ぼうとした場合など、通常のページ遷移として扱う
                     window.location.href = href;
                 }
             }
@@ -115,10 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/';
 
         if (isIndexPage) {
-            console.log("Current page is index.html. Starting slideshow and carousel."); // 診断ログ
-            startSlideshow(); // トップページのスライドショーを開始
+            console.log("Current page is index.html. Setting up product carousel."); // 診断ログ
+            // スライドショーは削除されたため、ここでの呼び出しは不要
             setupProductCarousel(); // トップページの商品カルーセルを開始
-            // setupScrollAnimations(); // スクロールアニメーション（もし必要なら）
+            // setupScrollAnimations(); // 必要であればスクロールアニメーションを有効化
         } else {
             // shosai.html のような詳細ページ専用の機能
             console.log("Current page is not index.html. Starting product detail slideshow."); // 診断ログ
@@ -126,42 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // トップページ専用: スライドショー（ファーストビュー）
-    function startSlideshow() {
-        const slides = document.querySelectorAll('.hero-section .slide');
-        console.log("startSlideshow called. Number of slides found:", slides.length); // 診断ログ
-
-        // スライド要素が見つからない場合は処理を中断
-        if (slides.length === 0) {
-            console.log("No slides found in .hero-section .slide. Slideshow will not start.");
-            return;
-        }
-
-        let slideIndex = 0; // 現在表示中のスライドのインデックス
-        let slideshowInterval; // 自動切り替えのインターバルID
-
-        // スライドを表示する関数
-        function showSlides() {
-            slides.forEach(slide => slide.classList.remove('active')); // 全てのスライドからactiveクラスを削除
-            slideIndex++; // 次のスライドへ
-            if (slideIndex > slides.length) {
-                slideIndex = 1; // 最後のスライドまで行ったら最初に戻る
-            }
-            slides[slideIndex - 1].classList.add('active'); // activeクラスを追加して表示
-            console.log("Showing slide index:", slideIndex - 1); // 診断ログ
-        }
-
-        // 最初のスライドをすぐにアクティブにして表示
-        if (slides[0]) { // 念のためslides[0]の存在を確認
-            slides[0].classList.add('active');
-            console.log("First slide set to active immediately."); // 診断ログ
-        } else {
-            console.log("Error: slides[0] not found for initial active class."); // 診断ログ
-        }
-        
-        // 5秒ごとにスライドを自動で切り替えるインターバルを設定
-        slideshowInterval = setInterval(showSlides, 5000);
-    }
+    // スライドショー機能は削除されたため、startSlideshow関数は存在しません。
 
     // トップページ専用: 商品一覧カルーセル
     function setupProductCarousel() {
@@ -195,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateCarousel() {
             const currentCardsPerPage = getCardsPerPage();
             // カードの幅とマージンを考慮した移動量
-            const cardWidth = productCards.length > 0 ? productCards[0].offsetWidth + 20 : 0;
+            // productCards[0].offsetWidth は要素の実際の幅を取得
+            const cardWidth = productCards.length > 0 ? productCards[0].offsetWidth + 20 : 0; // 20pxはマージンなどを想定
             carouselTrack.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
 
             // 矢印ボタンの表示/非表示を制御
@@ -219,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 次へボタンのイベントリスナー
         nextButton.addEventListener('click', () => {
             const currentCardsPerPage = getCardsPerPage();
-            // 最大インデックスは総カード数から表示カード数を引いた値
+            // 最大インデックスは総カード数から一度に表示するカード数を引いた値まで
             currentIndex = Math.min(totalCards - currentCardsPerPage, currentIndex + currentCardsPerPage);
             updateCarousel();
         });
@@ -230,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCarousel();
         });
 
-        // 初回表示
+        // 初回表示の更新
         updateCarousel();
     }
 
@@ -281,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // サムネイルクリック時のイベントリスナーを設定
-        thumbnails.forEach((thumbnail, index) => { // indexを直接取得するように変更
+        thumbnails.forEach((thumbnail, index) => { // indexを直接取得
             thumbnail.addEventListener('click', () => {
                 displaySlide(index); // クリックされたサムネイルのインデックスを直接渡す
                 startAutoPlay(); // クリックしたら自動再生を再開
@@ -290,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbnail.setAttribute('data-index', index.toString());
             thumbnail.classList.add('thumbnail'); // クラスがついていない場合は追加
         });
-
 
         // 初回表示と自動再生開始
         displaySlide(0);
