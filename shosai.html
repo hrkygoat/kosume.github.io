@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品詳細 | 保湿セラムA | K-Beauty Harmony</title>
+    <title>K-Beauty Harmony</title>
+    <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300&display=swap" rel="stylesheet">
-    </head>
+</head>
 <body>
     <header>
         <div class="container">
@@ -29,54 +30,50 @@
         </div>
     </header>
 
-    <main class="product-detail-page">
-        <div class="container">
-            <nav class="breadcrumb">
-                <a href="index.html">トップ</a> &gt; <a href="index.html#products">商品一覧</a> &gt; 保湿セラムA
-            </nav>
+    <main id="main-content" style="display: none;">
+        <div class="product-detail-page container">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> &gt; <a href="index.html#products">商品一覧</a> &gt; 保湿セラムA
+            </div>
 
             <section class="product-detail-section">
                 <div class="product-images">
                     <div class="product-slideshow-container">
                         <div class="product-slide active">
-                            <img src="img/A1.jpg" alt="保湿セラムA メイン画像">
+                            <img src="img/A1.jpg" alt="商品メイン画像1">
                         </div>
                         <div class="product-slide">
-                            <img src="img/A2.jpg" alt="保湿セラムA 別角度">
+                            <img src="img/A2.jpg" alt="商品サブ画像1">
                         </div>
                         <div class="product-slide">
-                            <img src="img/A3.jpg" alt="保湿セラムA 使用例">
+                            <img src="img/A3.jpg" alt="商品サブ画像2">
                         </div>
-                        <div class="product-slide">
-                            <img src="img/A4.jpg" alt="保湿セラムA テクスチャ">
                         </div>
-                    </div>
                     <div class="thumbnail-images">
-                        <img src="img/A1.jpg" alt="保湿セラムA サムネイル1" class="thumbnail active" data-index="0">
-                        <img src="img/A2.jpg" alt="保湿セラムA サムネイル2" class="thumbnail" data-index="1">
-                        <img src="img/A3.jpg" alt="保湿セラムA サムネイル3" class="thumbnail" data-index="2">
-                        <img src="img/A4.jpg" alt="保湿セラムA サムネイル4" class="thumbnail" data-index="3">
-                    </div>
+                        <img src="img/A1.jpg" alt="商品メイン画像1 サムネイル" class="thumbnail active" data-index="0">
+                        <img src="img/A2.jpg" alt="商品サブ画像1 サムネイル" class="thumbnail" data-index="1">
+                        <img src="img/A3.jpg" alt="商品サブ画像2 サムネイル" class="thumbnail" data-index="2">
+                        </div>
                 </div>
-                <div class="product-info">
-                    <h1 class="product-name">保湿セラムA</h1>
-                    <p class="product-price">価格: ¥3,800 <span class="tax-info">(税込 ¥4,180)</span></p>
 
+                <div class="product-info">
+                    <h2 class="product-name">保湿セラムA</h2>
+                    <p class="product-price">¥3,500 <span class="tax-info">(税込 ¥3,850)</span></p>
+                    
                     <div class="product-description">
                         <h3>商品説明</h3>
-                        <p>乾燥による小じわを目立たなくし、肌に潤いとハリを与える高保湿美容液です。角質層のすみずみまで浸透し、内側からふっくらとした肌へ導きます。敏感肌の方にもお使いいただける低刺激処方です。</p>
+                        <p>乾燥が気になる肌にうるおいを与え、しっとりとした肌へと導く高保湿セラムです。ベタつかず、すっとなじむテクスチャーで、毎日のお手入れに欠かせない一本。</p>
                         <h4>特徴</h4>
                         <ul>
-                            <li>**高濃度ヒアルロン酸:** 独自のブレンドで長時間潤いをキープ</li>
-                            <li>**セラミド配合:** 肌のバリア機能をサポートし、外部刺激から保護</li>
-                            <li>**植物由来成分:** カモミールエキス、ツボクサエキスが肌荒れを防ぎ健やかな肌へ</li>
-                            <li>**無香料・無着色・アルコールフリー:** 敏感肌にも安心</li>
+                            <li>ヒアルロン酸とセラミド配合で、長時間うるおいをキープ。</li>
+                            <li>敏感肌の方にも優しい低刺激処方。</li>
+                            <li>使うたびに肌のキメを整え、なめらかな肌触りを実感。</li>
+                            <li>フローラルな香りでリラックス効果も。</li>
                         </ul>
                         <h4>使用方法</h4>
-                        <p>洗顔後、化粧水で肌を整えた後に適量（2～3プッシュ）を手に取り、顔全体になじませてください。乾燥が気になる部分には重ね付けをおすすめします。</p>
-                        <h4>内容量</h4>
-                        <p>30ml</p>
+                        <p>洗顔後、化粧水で肌を整えた後に適量（2〜3プッシュ）を手に取り、顔全体に優しくなじませてください。</p>
                     </div>
+
                     <div class="product-actions">
                         <button class="btn add-to-cart">カートに入れる</button>
                         <button class="btn buy-now">今すぐ購入</button>
@@ -112,7 +109,7 @@
 
     <footer>
         <div class="container">
-            <p>© 2025 K-Beauty Harmony. All rights reserved.</p>
+            <p>&copy; 2025 K-Beauty Harmony. All rights reserved.</p>
         </div>
     </footer>
 
