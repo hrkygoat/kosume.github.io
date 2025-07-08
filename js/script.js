@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body; // body要素を取得
 
     // ローディングアニメーション
-    if (loadingScreen && mainContent) { // loadingScreenがあるページのみ適用 (例: index.html)
+    // loadingScreenとmainContentの両方が存在する場合に適用 (通常はindex.html)
+    if (loadingScreen && mainContent) {
         setTimeout(() => {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
@@ -15,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainContent.style.display = 'block'; // displayをblockに設定
                 mainContent.classList.add('loaded'); // opacityを1にするためのクラス
                 console.log("Loading screen finished. Initializing page features."); // 診断ログ
-                initializePageSpecificFeatures(); // ページ固有の機能を初期化
+                // ごくわずかに遅延させて、ブラウザがDOMを完全にレンダリングする時間を与える
+                setTimeout(() => initializePageSpecificFeatures(), 0);
             }, 500); // フェードアウトの時間に合わせる
         }, 1500); // 1.5秒後にローディングを終了 (調整可能)
     } else if (mainContent) {
@@ -23,9 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.style.display = 'block'; // displayをblockに設定
         mainContent.classList.add('loaded'); // opacityを1にするためのクラス
         console.log("No loading screen. Initializing page features directly."); // 診断ログ
-        initializePageSpecificFeatures(); // ページ固有の機能を初期化
+        // ごくわずかに遅延させて、ブラウザがDOMを完全にレンダリングする時間を与える
+        setTimeout(() => initializePageSpecificFeatures(), 0);
     }
-
 
     // ハンバーガーメニュー
     if (hamburgerMenu && navLinks) {
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.stopPropagation(); // ハンバーガーメニュー自身のクリックイベントがdocumentまで伝播しないように
         });
 
+        // ナビゲーションリンクがクリックされたらメニューを閉じる
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 if (navLinks.classList.contains('active')) {
@@ -47,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // ドキュメント全体のクリックイベントでメニューを閉じる
+        // ただし、ナビゲーションメニューやハンバーガーメニュー自身がクリックされた場合は除く
         document.addEventListener('click', (event) => {
             if (navLinks.classList.contains('active') && !event.target.closest('.nav-links') && !event.target.closest('.hamburger-menu')) {
                 navLinks.classList.remove('active');
@@ -57,10 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // スムーズスクロール
+    // 現在のページ内アンカーと、index.htmlへのアンカーリンクを処理
     document.querySelectorAll('a[href^="#"], a[href^="index.html#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
             const isCurrentPageAnchor = href.startsWith('#');
+            // shosai.htmlからindex.htmlのセクションへ移動する場合
             const isIndexPageAnchorFromOtherPage = href.startsWith('index.html#') && !window.location.pathname.includes('index.html');
 
             if (isCurrentPageAnchor || (isIndexPageAnchorFromOtherPage && mainContent)) {
@@ -70,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isCurrentPageAnchor) {
                     targetId = href.substring(1);
                 } else {
+                    // index.html#about から #about の部分だけを取得
                     targetId = href.split('#')[1];
                 }
 
@@ -94,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         body.classList.remove('no-scroll'); // bodyのスクロール禁止を解除
                     }
                 } else if (isIndexPageAnchorFromOtherPage) {
+                    // shosai.htmlからindex.htmlの存在しないIDへ飛ぼうとした場合など
                     window.location.href = href;
                 }
             }
@@ -103,17 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ページ固有の機能を初期化する関数
     function initializePageSpecificFeatures() {
         console.log("initializePageSpecificFeatures called."); // 診断ログ
-        const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/'; // トップページを判断
+        // 現在のURLがindex.htmlであるか、ルートパスであるかを判断
+        const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/';
 
         if (isIndexPage) {
             console.log("Current page is index.html. Starting slideshow and carousel."); // 診断ログ
-            startSlideshow(); // トップページのスライドショー
-            setupProductCarousel(); // トップページの商品カルーセル
+            startSlideshow(); // トップページのスライドショーを開始
+            setupProductCarousel(); // トップページの商品カルーセルを開始
             // setupScrollAnimations(); // スクロールアニメーション（もし必要なら）
         } else {
-            // 詳細ページ shosai.html 専用の機能
-            console.log("Current page is shosai.html. Starting product detail slideshow."); // 診断ログ
-            startProductDetailSlideshow(); // 商品詳細ページの画像スライドショー
+            // shosai.html のような詳細ページ専用の機能
+            console.log("Current page is not index.html. Starting product detail slideshow."); // 診断ログ
+            startProductDetailSlideshow(); // 商品詳細ページの画像スライドショーを開始
         }
     }
 
@@ -122,25 +131,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const slides = document.querySelectorAll('.hero-section .slide');
         console.log("startSlideshow called. Number of slides found:", slides.length); // 診断ログ
 
+        // スライド要素が見つからない場合は処理を中断
         if (slides.length === 0) {
             console.log("No slides found in .hero-section .slide. Slideshow will not start.");
             return;
         }
 
-        let slideIndex = 0;
-        let slideshowInterval;
+        let slideIndex = 0; // 現在表示中のスライドのインデックス
+        let slideshowInterval; // 自動切り替えのインターバルID
 
+        // スライドを表示する関数
         function showSlides() {
-            slides.forEach(slide => slide.classList.remove('active'));
-            slideIndex++;
+            slides.forEach(slide => slide.classList.remove('active')); // 全てのスライドからactiveクラスを削除
+            slideIndex++; // 次のスライドへ
             if (slideIndex > slides.length) {
-                slideIndex = 1;
+                slideIndex = 1; // 最後のスライドまで行ったら最初に戻る
             }
-            slides[slideIndex - 1].classList.add('active');
+            slides[slideIndex - 1].classList.add('active'); // activeクラスを追加して表示
             console.log("Showing slide index:", slideIndex - 1); // 診断ログ
         }
 
-        // 最初のスライドをすぐにアクティブに
+        // 最初のスライドをすぐにアクティブにして表示
         if (slides[0]) { // 念のためslides[0]の存在を確認
             slides[0].classList.add('active');
             console.log("First slide set to active immediately."); // 診断ログ
@@ -148,7 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Error: slides[0] not found for initial active class."); // 診断ログ
         }
         
-        slideshowInterval = setInterval(showSlides, 5000); // 5秒ごとにスライドを切り替え
+        // 5秒ごとにスライドを自動で切り替えるインターバルを設定
+        slideshowInterval = setInterval(showSlides, 5000);
     }
 
     // トップページ専用: 商品一覧カルーセル
@@ -158,106 +170,129 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevButton = document.querySelector('#products .prev-button');
         const nextButton = document.querySelector('#products .next-button');
 
+        // カルーセルに必要な要素が見つからない場合は処理を中断し、ボタンを非表示にする
         if (!carouselTrack || productCards.length === 0 || !prevButton || !nextButton) {
             if (prevButton) prevButton.style.display = 'none';
             if (nextButton) nextButton.style.display = 'none';
             return;
         }
 
-        let currentIndex = 0;
-        const totalCards = productCards.length;
+        let currentIndex = 0; // 現在のカルーセルの開始インデックス
+        const totalCards = productCards.length; // 商品カードの総数
 
+        // 画面幅に応じて一度に表示するカード数を決定
         function getCardsPerPage() {
             if (window.innerWidth <= 768) {
-                return 1;
+                return 1; // モバイル: 1列
             } else if (window.innerWidth <= 1024) {
-                return 2;
+                return 2; // タブレット: 2列
             } else {
-                return 3;
+                return 3; // デスクトップ: 3列
             }
         }
 
+        // カルーセルの表示を更新する
         function updateCarousel() {
             const currentCardsPerPage = getCardsPerPage();
+            // カードの幅とマージンを考慮した移動量
             const cardWidth = productCards.length > 0 ? productCards[0].offsetWidth + 20 : 0;
             carouselTrack.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
 
+            // 矢印ボタンの表示/非表示を制御
             prevButton.style.display = currentIndex === 0 ? 'none' : 'block';
             nextButton.style.display = (currentIndex + currentCardsPerPage >= totalCards) ? 'none' : 'block';
 
+            // 表示カード数が総カード数以上の場合は両方のボタンを非表示
             if (totalCards <= currentCardsPerPage) {
                 prevButton.style.display = 'none';
                 nextButton.style.display = 'none';
             }
         }
 
+        // 前へボタンのイベントリスナー
         prevButton.addEventListener('click', () => {
             const currentCardsPerPage = getCardsPerPage();
-            currentIndex = Math.max(0, currentIndex - currentCardsPerPage);
+            currentIndex = Math.max(0, currentIndex - currentCardsPerPage); // 最小は0
             updateCarousel();
         });
 
+        // 次へボタンのイベントリスナー
         nextButton.addEventListener('click', () => {
             const currentCardsPerPage = getCardsPerPage();
+            // 最大インデックスは総カード数から表示カード数を引いた値
             currentIndex = Math.min(totalCards - currentCardsPerPage, currentIndex + currentCardsPerPage);
             updateCarousel();
         });
 
+        // ウィンドウのリサイズ時にカルーセルをリセット
         window.addEventListener('resize', () => {
-            currentIndex = 0;
+            currentIndex = 0; // リサイズ時は最初の位置に戻す
             updateCarousel();
         });
 
+        // 初回表示
         updateCarousel();
     }
 
     // 商品詳細ページ専用: 商品画像スライドショー
     function startProductDetailSlideshow() {
         const productSlides = document.querySelectorAll('.product-slideshow-container .product-slide');
-        const thumbnails = document.querySelectorAll('.thumbnail-images .thumbnail');
+        const thumbnails = document.querySelectorAll('.thumbnail-images img'); // サムネイルはimgタグで取得
 
+        // スライドやサムネイルが見つからない場合は処理を中断
         if (productSlides.length === 0 || thumbnails.length === 0) {
             return;
         }
 
-        let currentProductSlideIndex = 0;
-        let productSlideshowInterval;
+        let currentProductSlideIndex = 0; // 現在表示中のスライドのインデックス
+        let productSlideshowInterval; // 自動切り替えのインターバルID
 
+        // 特定のスライドを表示する関数
         function displaySlide(index) {
+            // 全てのスライドとサムネイルのactiveクラスを削除
             productSlides.forEach(slide => slide.classList.remove('active'));
             thumbnails.forEach(thumb => thumb.classList.remove('active'));
 
+            // 指定されたインデックスが有効範囲内であることを確認
             const validIndex = Math.max(0, Math.min(index, productSlides.length - 1));
             
+            // 有効なスライドとサムネイルにactiveクラスを追加
             if (productSlides[validIndex]) {
                 productSlides[validIndex].classList.add('active');
             }
             if (thumbnails[validIndex]) {
                 thumbnails[validIndex].classList.add('active');
             }
-            currentProductSlideIndex = validIndex;
+            currentProductSlideIndex = validIndex; // 現在のインデックスを更新
         }
 
+        // 次のスライドに切り替える関数（自動再生用）
         function nextSlide() {
             const nextIndex = (currentProductSlideIndex + 1) % productSlides.length;
             displaySlide(nextIndex);
         }
 
+        // 自動再生を開始する関数
         function startAutoPlay() {
+            // 既存のタイマーがあればクリア
             clearInterval(productSlideshowInterval);
-            productSlideshowInterval = setInterval(nextSlide, 5000);
+            // 新しいタイマーを設定
+            productSlideshowInterval = setInterval(nextSlide, 5000); // 5秒ごとに切り替え
         }
 
-        thumbnails.forEach(thumbnail => {
+        // サムネイルクリック時のイベントリスナーを設定
+        thumbnails.forEach((thumbnail, index) => { // indexを直接取得するように変更
             thumbnail.addEventListener('click', () => {
-                const index = parseInt(thumbnail.getAttribute('data-index'));
-                if (!isNaN(index)) {
-                    displaySlide(index);
-                    startAutoPlay();
-                }
+                displaySlide(index); // クリックされたサムネイルのインデックスを直接渡す
+                startAutoPlay(); // クリックしたら自動再生を再開
             });
+            // data-index 属性がない場合はインデックスを追加（HTML修正不要にするため）
+            thumbnail.setAttribute('data-index', index.toString());
+            thumbnail.classList.add('thumbnail'); // クラスがついていない場合は追加
         });
 
+
+        // 初回表示と自動再生開始
         displaySlide(0);
         startAutoPlay();
     }
