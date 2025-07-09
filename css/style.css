@@ -259,9 +259,9 @@ transform: translateY(0);
     display: flex;
     transition: transform 0.5s ease-in-out;
     padding-bottom: 20px;
-    /* スワイプをJavaScriptで完全に制御する場合 */
+    /* JavaScriptでスワイプを完全に制御する場合、ブラウザのデフォルトのタッチ動作を無効にします */
     touch-action: none; /* ★変更: 水平・垂直方向のデフォルトのタッチアクションを無効化 */
-    -webkit-overflow-scrolling: touch; /* これはiOSでのスムーズなスクロールのためのもので、JavaScriptベースのカルーセルでも保持しても良いですが、直接的なスワイプ制御とは異なります。 */
+    -webkit-overflow-scrolling: touch; /* iOSでのスムーズなスクロールのためのもので、保持して問題ありません。 */
 }
 
 .product-card {
