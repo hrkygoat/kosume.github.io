@@ -144,6 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentIndex = 0; // 現在のカルーセルの開始インデックス
         const totalCards = productCards.length; // 商品カードの総数
+        let startX = 0; // タッチ開始時のX座標
+        let currentTranslateX = 0; // 現在のtranslateX値
+        let isDragging = false; // ドラッグ中かどうかのフラグ
 
         // 画面幅に応じて一度に表示するカード数を決定
         function getCardsPerPage() {
@@ -162,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // カードの幅とマージンを考慮した移動量
             // productCards[0].offsetWidth は要素の実際の幅を取得
             const cardWidth = productCards.length > 0 ? productCards[0].offsetWidth + 20 : 0; // 20pxはマージンなどを想定
-            carouselTrack.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+            currentTranslateX = -currentIndex * cardWidth;
+            carouselTrack.style.transform = `translateX(${currentTranslateX}px)`;
 
             // 矢印ボタンの表示/非表示を制御
             prevButton.style.display = currentIndex === 0 ? 'none' : 'block';
@@ -187,6 +191,56 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentCardsPerPage = getCardsPerPage();
             // 最大インデックスは総カード数から一度に表示するカード数を引いた値まで
             currentIndex = Math.min(totalCards - currentCardsPerPage, currentIndex + currentCardsPerPage);
+            updateCarousel();
+        });
+
+        // タッチイベントの追加
+        carouselTrack.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].clientX; // タッチ開始時のX座標を記録
+            // スムーズなアニメーションを一時的に無効化して、指の動きに追従させる
+            carouselTrack.style.transition = 'none';
+        });
+
+        carouselTrack.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+
+            const currentX = e.touches[0].clientX;
+            const diffX = currentX - startX; // 移動距離
+
+            // 指の動きに合わせてカルーセルを動かす
+            carouselTrack.style.transform = `translateX(${currentTranslateX + diffX}px)`;
+            
+            // 縦方向のスクロールを妨げないように、横方向へのスワイプのみpreventDefault
+            // ある程度の横移動が確認できた場合にのみpreventDefaultする
+            if (Math.abs(diffX) > 10) { // 10px以上横に動いたら
+                e.preventDefault();
+            }
+        });
+
+        carouselTrack.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            // アニメーションを再度有効化
+            carouselTrack.style.transition = 'transform 0.5s ease-in-out';
+
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - startX; // スワイプの最終的な距離
+
+            const swipeThreshold = 50; // スワイプと認識する閾値 (px)
+            const cardWidth = productCards.length > 0 ? productCards[0].offsetWidth + 20 : 0;
+
+            if (diffX > swipeThreshold) {
+                // 右スワイプ (前へ)
+                const currentCardsPerPage = getCardsPerPage();
+                currentIndex = Math.max(0, currentIndex - currentCardsPerPage);
+            } else if (diffX < -swipeThreshold) {
+                // 左スワイプ (次へ)
+                const currentCardsPerPage = getCardsPerPage();
+                currentIndex = Math.min(totalCards - currentCardsPerPage, currentIndex + currentCardsPerPage);
+            }
+            // スワイプが閾値に満たない場合は、元の位置に戻すか、現在の位置を維持
             updateCarousel();
         });
 
