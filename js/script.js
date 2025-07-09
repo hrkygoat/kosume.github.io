@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // script.js の既存のコードの末尾に追加
     
-        // 商品一覧カルーセルのスワイプ・ボタン機能
+    // 商品一覧カルーセルのスワイプ・ボタン機能
     const productCarouselTrack = document.querySelector('.carousel-track');
     const prevButton = document.querySelector('.carousel-button.prev');
     const nextButton = document.querySelector('.carousel-button.next');
@@ -330,46 +330,58 @@ document.addEventListener('DOMContentLoaded', () => {
         let prevTranslate = 0;
         let animationFrame;
         let currentIndex = 0; // 現在表示しているカードのインデックス
-        const cardWidth = productCarouselTrack.querySelector('.product-card') ? productCarouselTrack.querySelector('.product-card').offsetWidth + 20 : 0; // カードの幅 + マージン（左右10px*2）
 
-        // Helper to get current translateX value
+        // カードの幅を正確に計算する (マージンも含む)
+        let cardWidth = 0;
+        const firstCard = productCarouselTrack.querySelector('.product-card');
+        if (firstCard) {
+            const cardStyle = window.getComputedStyle(firstCard);
+            const marginLeft = parseFloat(cardStyle.marginLeft);
+            const marginRight = parseFloat(cardStyle.marginRight);
+            cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
+            console.log('Calculated cardWidth:', cardWidth); // デバッグ用
+        } else {
+            console.warn('No .product-card found in .carousel-track. Carousel functionality may be limited.');
+            return; // カードが見つからない場合は処理を終了
+        }
+
+        // 現在のtransform: translateX() の値を取得するヘルパー関数
         function getComputedTranslateX(element) {
             const style = window.getComputedStyle(element);
             const matrix = new DOMMatrixReadOnly(style.transform);
-            return matrix.m41; // m41 is the translateX value
+            return matrix.m41;
         }
 
-        // Helper to set transform
+        // transformを適用するヘルパー関数
         function setTransform(element, translateX) {
-            // Limits to prevent going too far left/right
-            const containerWidth = productCarouselTrack.parentElement.clientWidth; // .product-carousel width
-            const trackWidth = productCarouselTrack.scrollWidth; // .carousel-track total content width
+            const containerWidth = productCarouselTrack.parentElement.clientWidth; // .product-carouselの幅
+            const trackWidth = productCarouselTrack.scrollWidth; // .carousel-trackのコンテンツ幅
 
             let newTranslateX = translateX;
 
-            // Prevent dragging too far right (beyond initial position)
+            // 左端（0より右）に引っ張ろうとした場合、0に制限
             if (newTranslateX > 0) {
                 newTranslateX = 0;
             }
-
-            // Prevent dragging too far left (beyond end of content)
-            if (trackWidth > containerWidth) { // Only apply limit if content overflows
+            // 右端に到達した場合、それ以上右にスクロールさせない
+            if (trackWidth > containerWidth) { // コンテンツがコンテナより大きい場合のみ制限
                 const maxTranslate = -(trackWidth - containerWidth);
                 if (newTranslateX < maxTranslate) {
                     newTranslateX = maxTranslate;
                 }
-            } else { // If content fits within container, don't allow any translation
+            } else {
+                // コンテンツがコンテナに収まっている場合は、位置を0に固定
                 newTranslateX = 0;
             }
             element.style.transform = `translateX(${newTranslateX}px)`;
         }
 
-        // --- Mouse Events (for PC) ---
+        // --- マウスイベント (PC用) ---
         productCarouselTrack.addEventListener('mousedown', (e) => {
             isDragging = true;
             startPos = e.clientX;
             productCarouselTrack.style.cursor = 'grabbing';
-            productCarouselTrack.style.transition = 'none'; // Disable transition during drag
+            productCarouselTrack.style.transition = 'none'; // ドラッグ中はトランジションを無効化
             prevTranslate = getComputedTranslateX(productCarouselTrack);
             cancelAnimationFrame(animationFrame);
         });
@@ -378,70 +390,95 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isDragging) {
                 isDragging = false;
                 productCarouselTrack.style.cursor = 'grab';
-                productCarouselTrack.style.transition = ''; // Re-enable transition
-                // Snap to nearest card position or reset if needed
+                // マウスが要素を離れた場合もスナップさせる
+                snapToNearestCard();
             }
         });
 
         productCarouselTrack.addEventListener('mouseup', () => {
             isDragging = false;
             productCarouselTrack.style.cursor = 'grab';
-            productCarouselTrack.style.transition = ''; // Re-enable transition
-            // Snap logic (optional, for smooth card alignment after drag)
-            // Example: snap to the closest card (simplified)
-            const currentOffset = getComputedTranslateX(productCarouselTrack);
-            currentIndex = Math.round(Math.abs(currentOffset) / cardWidth);
-            setTransform(productCarouselTrack, -currentIndex * cardWidth);
+            // ドラッグ終了時にスナップさせる
+            snapToNearestCard();
         });
 
         productCarouselTrack.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            e.preventDefault(); // Prevent text selection etc.
+            e.preventDefault();
             const currentX = e.clientX;
             const walk = currentX - startPos;
             currentTranslate = prevTranslate + walk;
             setTransform(productCarouselTrack, currentTranslate);
         });
 
-        // --- Touch Events (for Mobile) ---
+        // --- タッチイベント (モバイル用) ---
         productCarouselTrack.addEventListener('touchstart', (e) => {
             isDragging = true;
             startPos = e.touches[0].clientX;
-            productCarouselTrack.style.transition = 'none'; // Disable transition during drag
+            productCarouselTrack.style.transition = 'none'; // ドラッグ中はトランジションを無効化
             prevTranslate = getComputedTranslateX(productCarouselTrack);
             cancelAnimationFrame(animationFrame);
         });
 
         productCarouselTrack.addEventListener('touchend', () => {
             isDragging = false;
-            productCarouselTrack.style.transition = ''; // Re-enable transition
-            // Snap logic for touch
-            const currentOffset = getComputedTranslateX(productCarouselTrack);
-            currentIndex = Math.round(Math.abs(currentOffset) / cardWidth);
-            setTransform(productCarouselTrack, -currentIndex * cardWidth);
+            // スワイプ終了時にスナップさせる
+            snapToNearestCard();
         });
 
         productCarouselTrack.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
-            e.preventDefault(); // Prevent screen scrolling
+            e.preventDefault();
             const currentX = e.touches[0].clientX;
             const walk = currentX - startPos;
             currentTranslate = prevTranslate + walk;
             setTransform(productCarouselTrack, currentTranslate);
         });
 
-        // --- Navigation Buttons ---
+        // スナップ機能 (最も近いカード位置に移動)
+        function snapToNearestCard() {
+            // トランジションを有効に戻す
+            productCarouselTrack.style.transition = 'transform 0.5s ease-in-out';
+            // 強制的にリフローを発生させ、トランジションが適用されるようにする
+            void productCarouselTrack.offsetWidth;
+
+            const currentOffset = getComputedTranslateX(productCarouselTrack);
+            // 現在のオフセットから最も近いカードのインデックスを計算
+            currentIndex = Math.round(Math.abs(currentOffset) / cardWidth);
+            
+            // 計算されたインデックスに基づいて最終的なtranslateXを適用
+            setTransform(productCarouselTrack, -currentIndex * cardWidth);
+        }
+
+        // --- ナビゲーションボタン ---
         if (prevButton && nextButton) {
+            // ボタンがHTMLに存在するか確認
+            console.log('Carousel buttons found:', prevButton, nextButton); // デバッグ用
+
             nextButton.addEventListener('click', () => {
-                const maxIndex = productCarouselTrack.children.length - Math.floor(productCarouselTrack.parentElement.clientWidth / cardWidth);
+                // 最大インデックス（最後のカード群が完全に表示される位置）
+                const containerWidth = productCarouselTrack.parentElement.clientWidth;
+                // 表示されているカードの数
+                const cardsInView = Math.floor(containerWidth / cardWidth);
+                // 最後のグループの最初のカードのインデックス
+                const maxIndex = Math.max(0, productCarouselTrack.children.length - cardsInView);
+                
                 currentIndex = Math.min(currentIndex + 1, maxIndex);
+                
+                // ボタンクリックもスナップ機能を利用してスムーズに移動
+                productCarouselTrack.style.transition = 'transform 0.5s ease-in-out';
                 setTransform(productCarouselTrack, -currentIndex * cardWidth);
             });
 
             prevButton.addEventListener('click', () => {
                 currentIndex = Math.max(currentIndex - 1, 0);
+                
+                // ボタンクリックもスナップ機能を利用してスムーズに移動
+                productCarouselTrack.style.transition = 'transform 0.5s ease-in-out';
                 setTransform(productCarouselTrack, -currentIndex * cardWidth);
             });
+        } else {
+            console.warn('Carousel buttons not found. Check selectors: .carousel-button.prev, .carousel-button.next'); // デバッグ用
         }
     }
 });
