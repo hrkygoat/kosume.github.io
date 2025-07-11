@@ -258,10 +258,10 @@ transform: translateY(0);
 .carousel-track {
     display: flex;
     transition: transform 0.5s ease-in-out;
-    padding-bottom: 20px;
-    /* JavaScriptでスワイプを完全に制御する場合、ブラウザのデフォルトのタッチ動作を無効にします */
-    touch-action: none; /* ★変更: 水平・垂直方向のデフォルトのタッチアクションを無効化 */
-    -webkit-overflow-scrolling: touch; /* iOSでのスムーズなスクロールのためのもので、保持して問題ありません。 */
+    padding-bottom: 20px; /* カードの下のマージン考慮 */
+    /* スワイプを可能にするために、タッチ操作で横スクロールを許可 */
+    -webkit-overflow-scrolling: touch; /* iOSでのスムーズなスクロール */
+    touch-action: pan-y; /* 縦方向のスクロールは許可し、横方向はJSで制御 */
 }
 
 .product-card {
@@ -712,27 +712,6 @@ footer {
     margin-bottom: 5px;
 }
 
-.product-actions {
-    margin-top: 30px;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.product-actions .btn {
-    flex: 1;
-    min-width: 180px; /* ボタンの最小幅 */
-    padding: 15px 20px;
-    font-size: 1.1em;
-    text-align: center;
-}
-
-.product-actions .buy-now {
-    background-color: var(--accent-color);
-}
-.product-actions .buy-now:hover {
-    background-color: #6fb0e0; /* darken(var(--accent-color), 10%)の代替 */
-}
 
 /* 関連商品セクション */
 .related-products .product-grid {
